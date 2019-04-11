@@ -15,13 +15,14 @@
 <body>
   <div id="inputArea">
     <h3>Template Literals Maker</h3>
-    <input id="theInput" type="text" value=""></input>
+    <textarea rows="5" cols="60" id="theInput" type="text" value=""></textarea>
   </div>
   </br>
   <div id="outputArea">
       <h3>as template literal:</h3>
-    <div id="theOutput"></div>
+    <intextareaput disabled rows="5" cols="60" id="theOutput" type="text"></textarea>
     <div id="theError"></div>
+    <button id="copyButton" onclick="copyToClipboard()">Copy to clipboard</button>
   </div>
   <script src="js/templateLiteralMaker.js"></script>
 </body>
