@@ -9,25 +9,15 @@ document
   .getElementById(inputId)
   .addEventListener("input", transformTextToTemplateLiteral);
 
-document.getElementById(
-  inputId
-).value = `"youve got " + 1 + ' example right ' + \`in this section\``;
+document.getElementById(inputId)
+  .value = `"youve got " + 1 + ' example right ' + \`in this section\``;
 
-function sanitize(str) {
-  const origLength = str.length;
-  let sanitized = str.trim();
-  if (sanitized.charAt(0) === "+") {
-    sanitized = sanitized.slice(1);
-  }
-  if (sanitized.charAt(sanitized.length - 1) === "+") {
-    sanitized = sanitized.slice(0, sanitized.length - 1);
-  }
-
-  if (sanitized.length === origLength) {
-    return sanitized;
-  } else {
-    return sanitize(sanitized);
-  }
+function transformTextToTemplateLiteral(evt) {
+  console.log(evt.target.value);
+  const inputStr = sanitize(evt.target.value);
+  const plusIndexes = parseInput(inputStr);
+  const transformed = toTemplateLiterals(inputStr, plusIndexes);
+  document.getElementById(outputId).value = transformed;
 }
 
 function parseInput(inputStr) {
@@ -63,7 +53,6 @@ function parseInput(inputStr) {
 
 function toTemplateLiterals(inputStr, plusIndexes) {
   let parts = [];
-  console.log("plusIndexes:", plusIndexes);
   let currentStr = inputStr;
   while (plusIndexes.length) {
     let idx = plusIndexes.pop();
@@ -72,52 +61,54 @@ function toTemplateLiterals(inputStr, plusIndexes) {
   }
   parts.unshift(currentStr.trim());
 
-  console.log(parts);
-  const processedParts = parts.map(part => {
-    if (enclosures.includes(part.charAt(0))) {
-      return part.substring(1, part.length - 1);
-    } else if (part.length === 0) {
-      return "";
-    } else if (part) {
-      try {
-        const something = JSON.parse(part); // TODO doesn't catch external strings
-        if (typeof something === "string") {
-          return `\${${part}}`;
-        } else {
-          return part;
-        }
-      } catch {
-        return part;
-      }
-    } else {
-      return `\${${part}}`;
-    }
-  });
+  const processedParts = parts.map(processPart);
 
   const templateLiteral = `\`${processedParts.join("")}\``;
-  if (templateLiteral.includes("  ")) {
-    // console.log("probably collapsing spaces")
-  }
   return templateLiteral;
 }
 
-function transformTextToTemplateLiteral(evt) {
-  console.log(evt.target.value);
-  const inputStr = sanitize(evt.target.value);
-  const plusIndexes = parseInput(inputStr);
-  const transformed = toTemplateLiterals(inputStr, plusIndexes);
-  document.getElementById(outputId).value = transformed;
+function sanitize(str) {
+  const origLength = str.length;
+  let sanitized = str.trim();
+  if (sanitized.charAt(0) === "+") {
+    sanitized = sanitized.slice(1);
+  }
+  if (sanitized.charAt(sanitized.length - 1) === "+") {
+    sanitized = sanitized.slice(0, sanitized.length - 1);
+  }
+
+  if (sanitized.length === origLength) {
+    return sanitized;
+  } else {
+    return sanitize(sanitized);
+  }
+}
+
+function processPart(str) {
+  if (str.length === 0) {
+    return "";
+  } else if (enclosures.includes(str.charAt(0))) {
+    // remove encapsulating characters
+    return str.substring(1, str.length - 1);
+  } else if (typeof Number(str) === "number" && !isNaN(Number(str))) {
+    // if it's a number
+    return str;
+  } else if (["undefined", "null", "NaN"].includes(str)) {
+    return str;
+  } else {
+    return `\${${str}}`;
+  }
 }
 
 function copyToClipboard() {
   const templateLiteral = document.getElementById(outputId);
   const str = templateLiteral.value;
-  const tempEl = document.createElement("textarea"); 
+  const tempEl = document.createElement("textarea");
   tempEl.value = str;
-  tempEl.setAttribute("readonly", ""); 
+  tempEl.setAttribute("readonly", "");
   tempEl.style.position = "absolute";
-  tempEl.style.left = "-9999px"; 
-  document.body.appendChild(tempEl); 
+  tempEl.style.left = "-9999px";
+  document.body.appendChild(tempEl);
   tempEl.select();
   document.execCommand("copy");
   document.body.removeChild(tempEl);
