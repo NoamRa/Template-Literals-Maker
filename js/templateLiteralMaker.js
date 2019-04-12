@@ -1,7 +1,7 @@
 const inputId = "theInput";
 const outputId = "theOutput";
 const errorId = "theError";
-const copyButton = "copyButton";
+const copyButtonId = "copyButton";
 
 const enclosures = ["'", "`", `"`];
 
@@ -10,10 +10,9 @@ document
   .addEventListener("input", transformTextToTemplateLiteral);
 
 document.getElementById(inputId)
-  .value = `"youve got " + 1 + ' example right ' + \`in this section\``;
+  .value = `"paste some " + \`\${concatenated}\` + strings + ' here ' + "and they will be joined" + " as template literals :)"`;
 
 function transformTextToTemplateLiteral(evt) {
-  console.log(evt.target.value);
   const inputStr = sanitize(evt.target.value);
   const plusIndexes = parseInput(inputStr);
   const transformed = toTemplateLiterals(inputStr, plusIndexes);
