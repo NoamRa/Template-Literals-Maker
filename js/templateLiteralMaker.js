@@ -9,11 +9,9 @@ document
   .getElementById(inputId)
   .addEventListener("input", transformTextToTemplateLiteral);
 
-document
-  .getElementById(inputId)
-  .value = `"youve got " + 1 + ' example right ' + \`in this section\``
-
-document.getElementById(copyButton).addEventListener("click", copyToClipboard);
+document.getElementById(
+  inputId
+).value = `"youve got " + 1 + ' example right ' + \`in this section\``;
 
 function sanitize(str) {
   const origLength = str.length;
@@ -24,7 +22,7 @@ function sanitize(str) {
   if (sanitized.charAt(sanitized.length - 1) === "+") {
     sanitized = sanitized.slice(0, sanitized.length - 1);
   }
-  
+
   if (sanitized.length === origLength) {
     return sanitized;
   } else {
@@ -54,8 +52,9 @@ function parseInput(inputStr) {
   }
 
   if (Boolean(stack.length)) {
-    document.getElementById(errorId)
-    .innerHTML = `something's not closed correctly`;
+    document.getElementById(
+      errorId
+    ).innerHTML = `something's not closed correctly`;
   } else {
     document.getElementById(errorId).innerHTML = ``;
   }
@@ -70,7 +69,7 @@ function toTemplateLiterals(inputStr, plusIndexes) {
     let idx = plusIndexes.pop();
     parts.unshift(currentStr.substring(idx + 1).trim());
     currentStr = currentStr.substring(0, idx);
-  };
+  }
   parts.unshift(currentStr.trim());
 
   console.log(parts);
@@ -97,7 +96,7 @@ function toTemplateLiterals(inputStr, plusIndexes) {
 
   const templateLiteral = `\`${processedParts.join("")}\``;
   if (templateLiteral.includes("  ")) {
-    console.log("probably collapsing spaces")
+    // console.log("probably collapsing spaces")
   }
   return templateLiteral;
 }
@@ -110,10 +109,16 @@ function transformTextToTemplateLiteral(evt) {
   document.getElementById(outputId).value = transformed;
 }
 
-
-function copyToClipboard(){
+function copyToClipboard() {
   const templateLiteral = document.getElementById(outputId);
-  console.log(templateLiteral.value);
-  templateLiteral.select();
+  const str = templateLiteral.value;
+  const tempEl = document.createElement("textarea"); 
+  tempEl.value = str;
+  tempEl.setAttribute("readonly", ""); 
+  tempEl.style.position = "absolute";
+  tempEl.style.left = "-9999px"; 
+  document.body.appendChild(tempEl); 
+  tempEl.select();
   document.execCommand("copy");
+  document.body.removeChild(tempEl);
 }
